@@ -52,11 +52,8 @@ async function getImageBlob(imageUrl) {
 }
 
 async function getLatestArticles(feed) {
-  const now = new Date("2024-11-19T11:40:01.000Z");
-
-  // const now = new Date();
-  const intervalMinutes = process.env.INTERVAL;
-  const cutoffTime = new Date(now.getTime() - intervalMinutes * 60 * 1000);
+  const now = new Date();
+  const cutoffTime = new Date(now.getTime() - process.env.INTERVAL * 60 * 1000);
 
   const articles = [];
 
@@ -132,8 +129,4 @@ async function main() {
 export default async (req, _) => {
   const publishedArticles = await main();
   return Response.json({ articles: JSON.stringify(publishedArticles) });
-};
-
-export const config = {
-  schedule: `*/${process.env.INTERVAL} * * * *`,
 };
