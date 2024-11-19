@@ -1,11 +1,9 @@
 const { BskyAgent } = require("@atproto/api");
-const { CronJob } = require("cron");
-const dotenv = require("dotenv");
-const process = require("process");
 const Parser = require("rss-parser");
 const axios = require("axios");
 
-dotenv.config();
+require("dotenv").config();
+
 const parser = new Parser();
 
 // Create a Bluesky Agent
@@ -44,11 +42,22 @@ async function uploadImgToBsky(imageBuffer, contentType) {
 }
 
 async function getImageBlob(imageUrl) {
-  const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
-  const contentType = response.headers["content-type"];
-  const imageBuffer = Buffer.from(response.data);
+  try {
+    const response = await fetch(imageUrl);
 
-  return { imageBuffer, contentType };
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    const arrayBuffer = await response.arrayBuffer();
+    const imageBuffer = Buffer.from(arrayBuffer);
+
+    return { imageBuffer, contentType };
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    throw error;
+  }
 }
 
 async function getLatestArticles(feed) {
