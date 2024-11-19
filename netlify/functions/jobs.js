@@ -52,9 +52,7 @@ async function getImageBlob(imageUrl) {
 }
 
 async function getLatestArticles(feed) {
-  const now = new Date("2024-11-19T05:57:18Z");
-
-  // const now = new Date();
+  const now = new Date();
   const intervalMinutes = process.env.INTERVAL;
   const cutoffTime = new Date(now.getTime() - intervalMinutes * 60 * 1000);
 
