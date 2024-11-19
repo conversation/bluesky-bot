@@ -107,14 +107,14 @@ async function main() {
       password: process.env.BLUESKY_PASSWORD,
     });
 
-    let feed = await parser.parseURL(process.env.RSS_FEED);
+    const feed = await parser.parseURL(process.env.RSS_FEED);
 
     if (!feed.items.length) {
       console.log("RSS feed empty");
       return;
     }
 
-    let latestArticles = await getLatestArticles(feed);
+    const latestArticles = await getLatestArticles(feed);
 
     if (!latestArticles.length) {
       console.log("No new articles");
@@ -122,14 +122,16 @@ async function main() {
     }
 
     latestArticles.forEach(async (article) => await postArticle(article));
+
+    return latestArticles;
   } catch (error) {
     console.log("error", error);
   }
 }
 
 export default async (req, _) => {
-  const { next_run } = await req.json();
-  return Response.json({ message: `Next run: ${next_run}` });
+  const publishedArticles = await main();
+  return Response.json({ articles: JSON.stringify(publishedArticles) });
 };
 
 export const config = {
