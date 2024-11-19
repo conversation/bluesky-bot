@@ -128,13 +128,9 @@ async function main() {
 }
 
 export default async (req) => {
-  // const { next_run } = await req.json();
+  const { next_run } = await req.json();
 
-  // console.log("Received event! Next invocation at:", next_run);
-  return {
-    statusCode: 200,
-    body: "Article posted!",
-  };
+  return new Response(`Received event! Next invocation at: ${next_run}`);
 };
 
 export const config = {
