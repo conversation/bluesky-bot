@@ -128,17 +128,10 @@ async function main() {
 }
 
 export default async (req) => {
-  console.log("testing with console log");
-  // const { next_run } = await req.json();
-
-  // return new Response(`Received event!`);
-  // return new Response(`Received event! Next invocation at: ${next_run}`);
-  return {
-    statusCode: 200,
-    body: "Hello",
-  };
+  const { next_run } = await req.json();
+  console.log("testing with console log. Next run:", next_run);
 };
 
-// export const config = {
-//   schedule: `*/${process.env.INTERVAL} * * * *`,
-// };
+export const config = {
+  schedule: `*/${process.env.INTERVAL} * * * *`,
+};
