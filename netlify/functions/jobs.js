@@ -128,10 +128,8 @@ async function main() {
 }
 
 export default async (req, _) => {
-  // const { next_run } = await req.json();
-  // console.log("testing with console log. Next run:", next_run);
-
-  return Response.json({ message: "Testing" });
+  const { next_run } = await req.json();
+  return Response.json({ message: `Next run: ${next_run}` });
 };
 
 export const config = {
