@@ -130,9 +130,10 @@ async function main() {
 export default async (req) => {
   const { next_run } = await req.json();
 
-  return new Response(`Received event! Next invocation at: ${next_run}`);
+  return new Response(`Received event!`);
+  // return new Response(`Received event! Next invocation at: ${next_run}`);
 };
 
-export const config = {
-  schedule: `*/${process.env.INTERVAL} * * * *`,
-};
+// export const config = {
+//   schedule: `*/${process.env.INTERVAL} * * * *`,
+// };
