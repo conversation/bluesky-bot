@@ -65,8 +65,6 @@ async function getLatestArticles(feed) {
   // const now = new Date("2024-11-20T00:45:16.000Z");
   const cutoffTime = new Date(now.getTime() - process.env.INTERVAL * 60 * 1000);
 
-  console.log(feed.items);
-
   const articles = [];
 
   // Process feed items
@@ -78,7 +76,8 @@ async function getLatestArticles(feed) {
     const title = item.title;
     const summary = item.summary ? item.summary : title;
     const pubDate = new Date(item.pubDate);
-    console.log(pubDate, title);
+
+    console.log(pubDate, title, `Now: ${now}, cutoff: ${cutoffTime}`);
 
     if (!(pubDate > cutoffTime && pubDate <= now)) continue;
 
