@@ -202,7 +202,7 @@ async function getLatestArticles(feed) {
     const summary = item.summary ? item.summary : title;
     const pubDate = new Date(item.pubDate).getTime();
 
-    console.log(pubDate > cutoffTime, title);
+    console.log(`Now: ${now}, from: ${cutoffTime}, published: ${pubDate}`);
 
     if (!(pubDate > cutoffTime && pubDate <= now)) continue;
 
