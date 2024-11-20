@@ -93,57 +93,83 @@ async function uploadImgToBsky(imageBuffer, contentType) {
   }
 }
 
-// async function getImageBlob(imageUrl) {
-//   try {
-//     const response = await fetch(imageUrl);
+// async function getImageBlob(imageUrl, retries = 3) {
+//   const controller = new AbortController();
+//   const timeoutDuration = 10000;
+//   const timeout = setTimeout(() => {
+//     controller.abort();
+//   }, timeoutDuration);
 
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! Status: ${response.status}`);
+//   for (let attempt = 1; attempt <= retries; attempt++) {
+//     try {
+//       console.log(`Attempt ${attempt}: Fetching image from URL: ${imageUrl}`);
+
+//       const response = await fetch(imageUrl, { signal: controller.signal });
+//       clearTimeout(timeout);
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+
+//       const contentType = response.headers.get("content-type");
+//       const arrayBuffer = await response.arrayBuffer();
+//       const imageBuffer = Buffer.from(arrayBuffer);
+
+//       return { imageBuffer, contentType };
+//     } catch (error) {
+//       clearTimeout(timeout);
+//       if (error.name === "AbortError") {
+//         console.error(`Attempt ${attempt}: Fetch request timed out`);
+//       } else if (error.code === "ETIMEDOUT") {
+//         console.error(
+//           `Attempt ${attempt}: Network timeout when fetching image: ${error.message}`
+//         );
+//       } else {
+//         console.error(`Attempt ${attempt}: Error fetching image:`, error);
+//       }
+
+//       if (attempt < retries) {
+//         console.warn(
+//           `Attempt ${attempt} failed. Retrying in ${attempt} seconds...`
+//         );
+//         await new Promise((res) => setTimeout(res, 1000 * attempt)); // Exponential backoff
+//         continue;
+//       } else {
+//         console.error("Max retries reached. Unable to fetch image.");
+//         throw error;
+//       }
 //     }
-
-//     const contentType = response.headers.get("content-type");
-//     const arrayBuffer = await response.arrayBuffer();
-//     const imageBuffer = Buffer.from(arrayBuffer);
-
-//     return { imageBuffer, contentType };
-//   } catch (error) {
-//     console.error("Error fetching image:", error);
-//     throw error;
 //   }
 // }
-async function getImageBlob(imageUrl, retries = 3) {
-  const controller = new AbortController();
-  const timeoutDuration = 10000; // 10 seconds
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, timeoutDuration);
+
+async function getImageBlob(imageUrl, retries = 5) {
+  const timeoutDuration = 10000; // Timeout duration in milliseconds (10 seconds)
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       console.log(`Attempt ${attempt}: Fetching image from URL: ${imageUrl}`);
 
-      const response = await fetch(imageUrl, { signal: controller.signal });
-      clearTimeout(timeout);
+      const response = await axios.get(imageUrl, {
+        responseType: "arraybuffer", // Handle binary data
+        timeout: timeoutDuration, // Set the request timeout
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const contentType = response.headers.get("content-type");
-      const arrayBuffer = await response.arrayBuffer();
-      const imageBuffer = Buffer.from(arrayBuffer);
+      const contentType = response.headers["content-type"];
+      const imageBuffer = Buffer.from(response.data);
 
       return { imageBuffer, contentType };
     } catch (error) {
-      clearTimeout(timeout);
-      if (error.name === "AbortError") {
-        console.error(`Attempt ${attempt}: Fetch request timed out`);
+      if (error.code === "ECONNABORTED") {
+        console.error(`Attempt ${attempt}: Request timed out`);
       } else if (error.code === "ETIMEDOUT") {
         console.error(
           `Attempt ${attempt}: Network timeout when fetching image: ${error.message}`
         );
       } else {
-        console.error(`Attempt ${attempt}: Error fetching image:`, error);
+        console.error(
+          `Attempt ${attempt}: Error fetching image:`,
+          error.message
+        );
       }
 
       if (attempt < retries) {
@@ -151,7 +177,6 @@ async function getImageBlob(imageUrl, retries = 3) {
           `Attempt ${attempt} failed. Retrying in ${attempt} seconds...`
         );
         await new Promise((res) => setTimeout(res, 1000 * attempt)); // Exponential backoff
-        continue;
       } else {
         console.error("Max retries reached. Unable to fetch image.");
         throw error;
@@ -168,7 +193,7 @@ async function getLatestArticles(feed) {
   const articles = [];
 
   // Process feed items
-  for (let i = feed.items.length - 1; i >= 0; i--) {
+  for (let i = 0; i < feed.items.length; i++) {
     // Reverse order to post oldest first
 
     const item = feed.items[i];
@@ -238,7 +263,9 @@ async function main() {
   }
 }
 
-export default async (req, _) => {
-  const publishedArticles = await main();
-  return Response.json({ articles: JSON.stringify(publishedArticles) });
-};
+main();
+
+// export default async (req, _) => {
+//   const publishedArticles = await main();
+//   return Response.json({ articles: JSON.stringify(publishedArticles) });
+// };
