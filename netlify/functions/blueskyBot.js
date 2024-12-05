@@ -14,7 +14,7 @@ async function fetchRSSFeed(url) {
     const feed = await parser.parseURL(url);
     return feed;
   } catch (error) {
-    console.error("Error fetching RSS feed:", error);
+    console.error("fetchRSSFeed error:", error);
     throw error;
   }
 }
@@ -34,7 +34,7 @@ async function fetchGitHubJSON(rawUrl) {
       Buffer.from(response.data.content, "base64").toString("utf8")
     );
   } catch (error) {
-    console.error("Error fetching JSON from GitHub:", error);
+    console.error("fetchGitHubJSON error:", error);
     throw error;
   }
 }
@@ -62,7 +62,7 @@ async function getImageBlob(link) {
 
     return { imageBuffer, contentType };
   } catch (error) {
-    console.error(`Error: ${error}`);
+    console.error(`getImageBlob error: ${error}`);
   }
 }
 
@@ -125,7 +125,7 @@ async function uploadImgToBsky(imageBuffer, contentType) {
         throw retryError;
       }
     } else {
-      console.error(`Error uploading image: ${error.message}`);
+      console.error(`uploadImgToBsky error: ${error.message}`);
       throw error;
     }
   }
@@ -200,9 +200,9 @@ async function processArticles(newArticles) {
       .reverse()
       .forEach(async (article) => await postArticle(article));
 
-    // return latestArticles;
+    return newArticleData;
   } catch (error) {
-    console.log("error", error);
+    console.log("postArticle error", error);
   }
 }
 
@@ -241,7 +241,7 @@ async function updateGitHubJSON(content, authToken) {
 
     if (updateResponse.status === 200) console.log("JSON links updated!");
   } catch (error) {
-    console.error("Error updating GitHub JSON file:", error.response.data);
+    console.error("updateGitHubJSON errir:", error.response.data);
   }
 }
 
@@ -258,8 +258,6 @@ async function main() {
 
     const newLinks = newArticles.map((item) => item.link);
 
-    // await updateGitHubJSON([], process.env.GITHUB_PAT);
-
     if (newArticles.length > 0) {
       // Process new links
       await processArticles(newArticles);
@@ -271,7 +269,7 @@ async function main() {
       console.log("No new articles.");
     }
   } catch (error) {
-    console.error("An error occurred:", error);
+    console.error("main error:", error);
   }
 }
 
