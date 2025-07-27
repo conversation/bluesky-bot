@@ -2,7 +2,7 @@
   "dependencies": {
     "@atproto/api": "^0.6.20",
     "@netlify/functions": "^2.8.2",
-    "axios": "^1.7.7",
+    "axios": "^1.8.2",
     "dotenv": "^16.4.5",
     "rss-parser": "^3.13.0"
   }
